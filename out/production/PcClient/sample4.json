@@ -1,0 +1,59 @@
+{
+   "type": "FeatureCollection",
+   "features": [
+     {
+       "type": "Feature",
+       "properties": {
+         "name": "Место 1",
+         "description": "Описание места 1"
+       },
+       "geometry": {
+         "type": "Point",
+         "coordinates": [longitude, latitude]
+       }
+     },
+     {
+       "type": "Feature",
+       "properties": {
+         "name": "Место 2",
+         "description": "Описание места 2"
+       },
+       "geometry": {
+         "type": "Point",
+         "coordinates": [longitude, latitude]
+       }
+     },
+     {
+       "type": "Feature",
+       "properties": {
+         "name": "Линия",
+         "description": "Описание линии"
+       },
+       "geometry": {
+         "type": "LineString",
+         "coordinates": [
+           [longitude1, latitude1],
+           [longitude2, latitude2]
+         ]
+       }
+     },
+     {
+       "type": "Feature",
+       "properties": {
+         "name": "Полигон",
+         "description": "Описание полигона"
+       },
+       "geometry": {
+         "type": "Polygon",
+         "coordinates": [
+           [
+             [longitude1, latitude1],
+             [longitude2, latitude2],
+             [longitude3, latitude3],
+             [longitude1, latitude1]
+           ]
+         ]
+       }
+     }
+   ]
+ }
