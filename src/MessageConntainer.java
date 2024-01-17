@@ -25,7 +25,7 @@ public  class MessageConntainer {
         // когда получаем пакет, котороый является последним
         if (n==(byte)255){ // if end packet
             int listLen =  currentList.size();
-            int payloadSize = SerailPort.bufferSize -4;
+            int payloadSize = SerailPort.bufferSize -6;
                 int size = (currentList.size() - 1)*(payloadSize)
                         + currentList.get(listLen - 1).getPayload().length;
                 byte[] recievedData = new byte[size];// собираем всю полезную нагрузку воедино

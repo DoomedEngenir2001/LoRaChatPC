@@ -18,7 +18,7 @@ public class messageScreen extends JDialog {
     private FileInputStream is;
     private Zipper compressor;
     private static byte[] Id = {(byte) 0, (byte) 1};
-    private static final int payloadSize = SerailPort.bufferSize -4;
+    private static final int payloadSize = SerailPort.bufferSize -6;
     public messageScreen() {
         setContentPane(contentPane);
         setModal(true);
@@ -91,7 +91,7 @@ public class messageScreen extends JDialog {
         textField1.setText("");
     }
 
-    private void onSendFile() {
+    private void onSendFile() { // not work
         try {
             compressor = new Zipper();
             JFileChooser dialog = new JFileChooser();
