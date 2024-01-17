@@ -2,11 +2,13 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.time.LocalTime;
 import java.lang.Thread;
-// использовал  java swing для ЮИ
-// 20 JDK
-// запускать этот файл
+import java.util.Date;
+// 16 JDK
 public class messageScreen extends JDialog {
     private JPanel contentPane;
     private JButton buttonSend;
@@ -15,9 +17,9 @@ public class messageScreen extends JDialog {
     private static SerailPort serialSocket ;
     private FileInputStream is;
     private Zipper compressor;
-    private static byte[] Id = {(byte) 0, (byte) 1}; // адрес модема
-    private static final int payloadSize = SerailPort.bufferSize -4;  // размер полезной нагрузки
-    public messageScreen() { // инициализация интерфейса пользоваеля
+    private static byte[] Id = {(byte) 0, (byte) 1};
+    private static final int payloadSize = SerailPort.bufferSize -4;
+    public messageScreen() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonSend);
@@ -49,10 +51,18 @@ public class messageScreen extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
-    private  static Message[] getPackets(byte[] Bytes){ // разбивает байтовую последовательность на пакеты
+    private  static Message[] getPackets(byte[] Bytes){
         int bound = 0;
         int byteSize = Bytes.length;
         int nPackets = byteSize / payloadSize + 1;
+        byte[] time_label = new byte[3];
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime now_ = LocalTime.now();
+        String ldate = dtf.format(now_); // 12:07:34
+        String[] datePart = ldate.split(":");
+        time_label[0] = (byte)Integer.parseInt(datePart[0]);
+        time_label[1] = (byte)Integer.parseInt(datePart[1]);
+        time_label[2] = (byte)Integer.parseInt(datePart[2]);
         byte[] payload = new byte[payloadSize];
         Message[] packets = new Message[nPackets];
         for(int i =0; i< nPackets;i++){
@@ -61,8 +71,8 @@ public class messageScreen extends JDialog {
             else bound = byteSize;
             //   if(bound < 0)bound += SerailPort.bufferSize;
             payload = Arrays.copyOfRange(Bytes, i*payloadSize, bound);
-            if(i != nPackets-1)packets[i] = new Message(Id, (byte)i, payload); // create packet
-            else packets[i] = new Message(Id, (byte)255, payload);
+            if(i != nPackets-1)packets[i] = new Message(Id, (byte)i, payload, time_label); // create packet
+            else packets[i] = new Message(Id, (byte)255, payload, time_label);
         }
         return  packets;
     }
@@ -71,9 +81,9 @@ public class messageScreen extends JDialog {
 
         Zipper comp = new Zipper();
         String text = textField1.getText();
-        text =text + " " + " " + " " + " "; // костыль, связанный с особенностью сжатия
+        text =text + " " + " " + " "; // work 4 this
         byte[] textBytes = text.getBytes();
-        byte[] compData = comp.flate(textBytes); // сжать
+        byte[] compData = comp.flate(textBytes);
         Message[] packets = getPackets(compData);
         for(int i=0; i<packets.length;++i){
             serialSocket.serilWrite(packets[i]);
@@ -81,7 +91,7 @@ public class messageScreen extends JDialog {
         textField1.setText("");
     }
 
-    private void onSendFile() {// отправить файл
+    private void onSendFile() {
         try {
             compressor = new Zipper();
             JFileChooser dialog = new JFileChooser();
@@ -93,10 +103,10 @@ public class messageScreen extends JDialog {
                 return;
             }
             is = new FileInputStream(filename);
-            byte[] data = new byte[is.available()];
-            int pos = is.read(data);// читаем
-            byte[] compressedData = compressor.flate(data);// сжать
-            Message[] packets = getPackets(compressedData); // разбить на пакеты
+            byte[] data = new byte[100024];
+            int pos = is.read(data);
+            byte[] compressedData = compressor.flate(data);
+            Message[] packets = getPackets(compressedData);
             for (int i = 0; i < packets.length; ++i) {
                 serialSocket.serilWrite(packets[i]);
             }
