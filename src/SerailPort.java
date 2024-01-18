@@ -45,6 +45,16 @@ public class SerailPort {
         }
 
     }
+    public static void serilWrite(byte[] data){
+        try{
+            serialPort.writeBytes(data);
+            Thread.sleep(SerailPort.sleepTime);
+        }catch (SerialPortException ex){
+            System.out.println("can't write");
+        }catch (InterruptedException ex){
+            System.out.println("can't write");
+        }
+    }
     // обработчик событий последовательного порта
     private static class PortReader implements SerialPortEventListener {
         private static byte[] SerialRead() throws SerialPortException{ // просто читаем байты
@@ -60,7 +70,6 @@ public class SerailPort {
                         Message mess =new Message(data);
                         MessageConntainer.addMessage(mess);
                         // !replace for widget paste
-
                     }
 
                 }

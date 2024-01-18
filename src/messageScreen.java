@@ -2,18 +2,17 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.time.LocalTime;
-import java.lang.Thread;
-import java.util.Date;
+import javax.swing.JOptionPane;
 // 16 JDK
 public class messageScreen extends JDialog {
     private JPanel contentPane;
     private JButton buttonSend;
     private JButton buttonSendFile;
     private JTextField textField1;
+    private JButton channelButton;
     private static SerailPort serialSocket ;
     private FileInputStream is;
     private Zipper compressor;
@@ -35,9 +34,14 @@ public class messageScreen extends JDialog {
                 onSendFile();
             }
         });
+        channelButton.addActionListener(new ActionListener() {
 
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                                            public void actionPerformed(ActionEvent e) {
+                                                onChangeChannel();
+                                            }
+                                        });
+                // call onCancel() when cross is clicked
+                setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
@@ -81,7 +85,7 @@ public class messageScreen extends JDialog {
 
         Zipper comp = new Zipper();
         String text = textField1.getText();
-        text =text + " " + " " + " "; // work 4 this
+        text =text + " " + " " + " " + " "; // work 4 this
         byte[] textBytes = text.getBytes();
         byte[] compData = comp.flate(textBytes);
         Message[] packets = getPackets(compData);
@@ -103,7 +107,7 @@ public class messageScreen extends JDialog {
                 return;
             }
             is = new FileInputStream(filename);
-            byte[] data = new byte[100024];
+            byte[] data = new byte[is.available()];
             int pos = is.read(data);
             byte[] compressedData = compressor.flate(data);
             Message[] packets = getPackets(compressedData);
@@ -116,6 +120,14 @@ public class messageScreen extends JDialog {
         }
 
     }
+    private void onChangeChannel(){
+        byte channel = (byte)Integer.parseInt(JOptionPane.showInputDialog("Выберите канал (1-31)"));
+        byte[] changeChannelCommand = {0x0C, channel};
+        serialSocket.serilWrite(changeChannelCommand); // write to modem
+        Message[] channelPacket = getPackets(changeChannelCommand);
+        serialSocket.serilWrite(channelPacket[0]); // transieve to change channel
+    }
+
     private void onCancel() {
         // add your code here if necessary
         dispose();

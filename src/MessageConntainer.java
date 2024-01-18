@@ -6,6 +6,12 @@ public  class MessageConntainer {
     private static Map<byte[], List<Message>> messageContainer= new HashMap<byte[], List<Message> >();
     private static Zipper zip = new Zipper();
     public static void addMessage(Message message){
+        if(message.getPayload()[0] == 0x0C && message.getSize() == 8){
+            byte[] command = message.getPayload();
+            SerailPort.serilWrite(command);
+            return;
+        }
+
         byte[] id_ = message.getId();
         byte n = message.getN();
         List<Message> currentList;
